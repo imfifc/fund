@@ -1,0 +1,29 @@
+Byte-compiled / optimized / DLL files
+__pycache__/
+ config/__pycache__/
+.idea/
+fixtures/
+# Django stuff:
+*.log
+*/__pycache__/
+db.sqlite3-journal
+.DS_Store
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# Environments
+.env
+.venv
+Test/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+.venv/
+*.pyc
