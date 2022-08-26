@@ -59,28 +59,9 @@ class FundRand(db.Model):
 
 def bar_base() -> Bar:
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-    date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
-    dates = [i.date for i in date_instances]
-    x_data = dates
     y_data = [820, 932, 901, 934, 1290, 1330, 1320]
     # 股票型
-    gp_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
-    gp_datas = [i.last3month for i in gp_instances]
-    # 债券型
-    zq_instances = FundRand.query.filter_by(type='zq').order_by('date').all()
-    zq_datas = [i.last3month for i in zq_instances]
-    # 指数型
-    zs_instances = FundRand.query.filter_by(type='zs').order_by('date').all()
-    zs_datas = [i.last3month for i in zs_instances]
-    # qdii型
-    qdii_instances = FundRand.query.filter_by(type='qdii').order_by('date').all()
-    qdii_datas = [i.last3month for i in qdii_instances]
-    # fof型
-    fof_instances = FundRand.query.filter_by(type='fof').order_by('date').all()
-    fof_datas = [i.last3month for i in fof_instances]
-    # 混合型
-    hh_instances = FundRand.query.filter_by(type='hh').order_by('date').all()
-    hh_datas = [i.last3month for i in hh_instances]
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas()
 
     c = (
         Line()
@@ -197,6 +178,12 @@ def line2():
 
 @app.route("/echart")
 def echart():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas()
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+def get_x_y_datas():
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
     date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
@@ -221,9 +208,7 @@ def echart():
     hh_instances = FundRand.query.filter_by(type='hh').order_by('date').all()
     hh_datas = [i.last3month for i in hh_instances]
     # print('hh_datas', hh_datas)
-
-    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
-                   qdii_data=qdii_datas, fof_data=fof_datas)
+    return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
 
 @app.route("/barChart")

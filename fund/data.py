@@ -1,4 +1,5 @@
 import json
+import time
 
 import requests
 import re
@@ -70,4 +71,6 @@ def aggreate_data():
 
 
 if __name__ == '__main__':
+    start = time.time()
     aggreate_data()
+    print(time.time()-start)
