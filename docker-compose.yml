@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  web:
+    build: .
+    container_name: fund
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /root/.ssh:/root/.ssh
+      - /tmp/fund.sqlite3:/Project/demo/fund/fund.sqlite3
+    ports:
+      - "8090:8090"
+    privileged: true
+
+    deploy:
+      restart_policy:
+        condition: on-failure
