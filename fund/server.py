@@ -181,7 +181,8 @@ def update(id):
     if request.method == "POST":
         # print('form', request.form.to_dict())
         form = request.form.to_dict()
-        FundRand.query.filter_by(id=id).update({'last3month': form.get('price'), 'date': form.get('date')})
+        FundRand.query.filter_by(id=id).update(
+            {'last3month': form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
         db.session.commit()
         return redirect(url_for('show'))
 
@@ -197,9 +198,25 @@ def delete(id):
         # form = request.form.to_dict()
         FundRand.query.filter_by(id=id).delete()
         db.session.commit()
-        return '删除成功'
+        # return '删除成功'
+        return redirect(url_for('show'))
 
     return render_template('delete_fund.html', user=user)
+
+
+@app.route('/batch_delete/<date>', methods=['POST', 'GET'])
+def batch_delete(date):
+    user = FundRand.query.filter_by(date=date).first()
+
+    if request.method == "POST":
+        # print('form', request.form.to_dict())
+        # form = request.form.to_dict()
+        FundRand.query.filter_by(date=date).delete()
+        db.session.commit()
+        # return '删除成功'
+        return redirect(url_for('show'))
+
+    return render_template('batch_delete.html', user=user)
 
 
 @app.route("/")

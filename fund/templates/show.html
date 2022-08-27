@@ -5,9 +5,11 @@
     <title>show</title>
 </head>
 <body>
+ <a href="/test">test</a>
  <a href="/insert">插入</a>
- <a href="/line1">line1 曲线</a>
- <a href="/line2">line2 曲线</a>
+ <a href="/line1">line1_曲线</a>
+ <a href="/line2">line2_曲线</a>
+ <a href="/new">爬虫添加数据 </a>
 
 <table>
     <tr>
@@ -28,6 +30,7 @@
             <td>
                 <a href="update/{{ each.id }}">更新</a>
                 <a href="delete/{{ each.id }}">删除</a>
+                <a href="batch_delete/{{ each.date }}">批量删除</a>
             </td>
         </tr>
     {% endfor %}
