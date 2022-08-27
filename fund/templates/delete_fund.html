@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>删除书籍条目</title>
+    <style>
+        input:not([type="submit"]) {
+            border: 1px solid blue;
+        }
+
+        input[type="submit"] {
+            background: red;
+        }
+    </style>
+</head>
+<body>
+<form action="" method="post">
+    {#    {% csrf_token %}#}
+    <p>
+        code:<input type="text" value="{{ user.code }}" disabled="disabled">
+    </p>
+    <p>
+        名字:<input type="text" value="{{ user.name }}" disabled="disabled">
+    </p>
+    <p>
+        最近3月值:<input type="text" name="price" value="{{ user.last3month }}" disabled="disabled" >
+    </p>
+    <p>
+        日期:<input type="text" name="date" value="{{ user.date }}" disabled="disabled" >
+    </p>
+    <input type="submit" value="确认删除">
+    </p>
+</form>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>show</title>
+</head>
+<body>
+
+<table>
+    <tr>
+        <th>基金代码</th>
+        <th>名字</th>
+        <th>最近3月</th>
+        <th>类型</th>
+        <th>日期</th>
+
+    </tr>
+    {% for each in datas %}
+        <tr>
+            <td>{{ each.code }}</td>
+            <td>{{ each.name }}</td>
+            <td>{{ each.last3month }}</td>
+            <td>{{ each.type }}</td>
+            <td>{{ each.date }}</td>
+            <td>
+                <a href="update/{{ each.id }}">更新</a>
+                <a href="delete/{{ each.id }}">删除</a>
+            </td>
+        </tr>
+    {% endfor %}
+
+
+</table>
+
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加书籍信息</title>
+</head>
+<body>
+<form action="/insert" method="post">
+    {#    {% csrf_token %}#}
+    <p>
+        name : <input type="text" name="name">
+    </p>
+    <p>
+        code : <input type="text" name="code" placeholder="6位数">
+    </p>
+    <p>
+        type : <input type="text" name="type" placeholder="gp">
+    </p>
+    <p>
+        last3month price : <input type="text" name="last3month">
+    </p>
+    <p>
+        date : <input type="text" name="date" placeholder="2022-08-27">
+    </p>
+
+    <p>
+        <!--按钮的值提交--> <input type="submit" value="提交">
+    </p>
+</form>
+</body>
+</html>

@@ -49,6 +49,7 @@ class FundRand(db.Model):
 
     def tojson(self):
         return {
+            'id': self.id,
             'code': self.code,
             'type': self.type,
             'name': self.name,
@@ -146,10 +147,59 @@ def new():
 
 @app.route('/show')
 def show():
-    datas = FundRand.query.all()
+    datas = FundRand.query.order_by('date').all()
     # print(res)
     datas = [i.tojson() for i in datas]
-    return jsonify(data=datas, code=200)
+    return render_template('show.html', datas=datas)
+
+
+@app.route('/insert', methods=['POST', 'GET'])
+def insert():
+    # user = FundRand.query.filter_by(id=id).first()
+    if request.method == "POST":
+        # print('form', request.form.to_dict())
+        form = request.form.to_dict()
+        data = {
+            'code': form.get('code'),
+            'type': form.get('type'),
+            'name': form.get('name'),
+            'last3month': form.get('last3month'),
+            'date': form.get('date'),
+        }
+        f = FundRand(**data)
+        db.session.add(f)
+        db.session.commit()
+        return redirect(url_for('show'))
+
+    return render_template('insert_fund.html')
+
+
+@app.route('/update/<int:id>', methods=['POST', 'GET'])
+def update(id):
+    user = FundRand.query.filter_by(id=id).first()
+
+    if request.method == "POST":
+        # print('form', request.form.to_dict())
+        form = request.form.to_dict()
+        FundRand.query.filter_by(id=id).update({'last3month': form.get('price'), 'date': form.get('date')})
+        db.session.commit()
+        return redirect(url_for('show'))
+
+    return render_template('update.html', user=user)
+
+
+@app.route('/delete/<int:id>', methods=['POST', 'GET'])
+def delete(id):
+    user = FundRand.query.filter_by(id=id).first()
+
+    if request.method == "POST":
+        # print('form', request.form.to_dict())
+        # form = request.form.to_dict()
+        FundRand.query.filter_by(id=id).delete()
+        db.session.commit()
+        return '删除成功'
+
+    return render_template('delete_fund.html', user=user)
 
 
 @app.route("/")
@@ -227,4 +277,6 @@ if __name__ == "__main__":
     /test 图表展示0
     /line1 图表展示1
     /line2 图表展示2
+    /insert 插入数据
+     update delete 
     '''
