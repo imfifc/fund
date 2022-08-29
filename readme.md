@@ -72,5 +72,5 @@ services:
       restart_policy:
         condition: on-failure
 ```
-
+sqlite 使用外挂的方式
 

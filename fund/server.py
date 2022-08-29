@@ -296,4 +296,5 @@ if __name__ == "__main__":
     /line2 图表展示2
     /insert 插入数据
      update delete 
+     todo: login cookie session model拆分，蓝图
     '''
