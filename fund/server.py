@@ -1,10 +1,7 @@
-import json
-from datetime import datetime
-import time
-from random import randrange
-
 from flask import Flask, request, flash, url_for, redirect, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from gevent import pywsgi
 
 from pyecharts import options as opts
 from pyecharts.charts import Bar, Line
@@ -14,48 +11,24 @@ from pyecharts.faker import Faker
 
 # app = Flask(__name__, static_folder="static")  # static file 切记不要写错哦
 from fund.data import aggreate_data
+from fund.models import FundRand
+from fund.dbs import db
 
 app = Flask(__name__)  # static file 切记不要写错哦
+app.config['JSON_AS_ASCII'] = False
+# 这里连接串的意思是使用pymysql去连接mysql
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3316/mytest'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fund.sqlite3'
 app.config['SECRET_KEY'] = "random string"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SQLALCHEMY_COMMIT_TEARDOWN'] = True
 
-# db.init_app(app)
+CORS(app, supports_credentials=True)
+# init_app就是为了解决循环引用的
+db.init_app(app)
 
-db = SQLAlchemy(app)
 
-
-class FundRand(db.Model):
-    __tablename__ = 'fund'
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(10))
-    type = db.Column(db.String(10))
-    name = db.Column(db.String(100))
-    last3month = db.Column(db.Float)
-    date = db.Column(db.String(30), default=None)
-
-    # create_date = db.Column(db.DateTime, default=datetime.now, index=True)
-    # update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    def __init__(self, name, code, last3month, date, type):
-        self.name = name
-        self.code = code
-        self.last3month = last3month
-        self.date = date
-        self.type = type
-
-    def __repr__(self):
-        return '<User %r>' % self.name
-
-    def tojson(self):
-        return {
-            'id': self.id,
-            'code': self.code,
-            'type': self.type,
-            'name': self.name,
-            'last3month': self.last3month,
-            'date': self.date,
-        }
+# db = SQLAlchemy(app)
 
 
 def bar_base() -> Bar:
@@ -286,8 +259,9 @@ def get_bar_chart():
 
 if __name__ == "__main__":
     # db.drop_all()
-    db.create_all()
+    # db.create_all()
     app.run(debug=True, threaded=True)
+
     '''提供的方法
     /new 增加数据
     /show 显示所有数据
