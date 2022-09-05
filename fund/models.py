@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash
+
 from fund.dbs import db
 
 
@@ -32,3 +34,41 @@ class FundRand(db.Model):
             'last3month': self.last3month,
             'date': self.date,
         }
+
+
+# Create your models here.
+class User(db.Model):  # 创建用户信息表
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    name_cn = db.Column(db.String(30), nullable=False)
+
+    # create_time = db.Column(db.String(30))  # 第一次创建的时间
+    # email = db.Column(db.String(30))
+    @classmethod
+    def add_admin(cls):
+        user = db.session.query(User).filter(User.username == 'admin').first()
+        if user is None:
+            user = User(username='admin', password=generate_password_hash('123456'), name_cn='管理员')
+            db.session.add(user)
+            db.session.commit()
+
+    def __str__(self):
+        return '<User：%s>' % self.username
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    text = db.Column(db.String, nullable=False)
+
+    def __init__(self, title, text):
+        self.title = title
+        self.text = text
+
+    def __repr__(self):
+        return f"<title {self.title}>"
