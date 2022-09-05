@@ -18,3 +18,7 @@ docker run -d --network=host --name=fund testfund:v1
 # 设置定时任务触发启动爬虫入库
 0 1 * * *  docker exec stock2 /bin/sh -c 'wget localhost:8090/new > /dev/null 2>&1 &'
 0 1 * * *  curl localhost:8090/new > /tmp/fund.txt 2>&1 &
+
+
+#PS C:\Users\Administrator\Desktop\tengyun\fund\fund> $env:FLASK_APP = "server.py"
+#flask run

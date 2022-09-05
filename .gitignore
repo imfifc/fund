@@ -27,3 +27,13 @@ venv.bak/
 
 .venv/
 *.pyc
+
+instance/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
