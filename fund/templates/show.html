@@ -5,11 +5,12 @@
     <title>show</title>
 </head>
 <body>
- <a href="/test">test</a>
- <a href="/insert">插入</a>
- <a href="/line1">line1_曲线</a>
- <a href="/line2">line2_曲线</a>
- <a href="/new">爬虫添加数据 </a>
+<a href="/test">test</a>
+<a href="/insert">插入</a>
+<a href="/line1">line1_曲线</a>
+<a href="/line2">line2_曲线</a>
+<a href="/new">爬虫添加数据 </a>
+<a href="/upload">上传数据 </a>
 
 <table>
     <tr>
@@ -22,8 +23,8 @@
     </tr>
     {% for each in datas %}
         <tr>
-            <td>{{ each.code }}</td>
-            <td>{{ each.name }}</td>
+            <td><a href="http://fund.eastmoney.com/{{ each.code }}.html"> {{ each.code }}</a></td>
+            <td><a href="http://fund.eastmoney.com/{{ each.code }}.html"> {{ each.name }} </a></td>
             <td>{{ each.last3month }}</td>
             <td>{{ each.type }}</td>
             <td>{{ each.date }}</td>

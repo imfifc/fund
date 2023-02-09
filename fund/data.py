@@ -1,20 +1,39 @@
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 import re
 
+# 取排行榜第一列数据 在第几列
+index_map = {
+    'rzdf': 6,
+    'zzf': 7,
+    '1yzf': 8,
+    '3yzf': 9,
+    '6yzf': 10,
+    '1nzf': 11,
+}
+#  接口参数映射为 普通字段
+month_map = {
+    'rzdf': 'dayGrowRate',
+    'zzf': 'last1week',
+    '1yzf': 'last1month',
+    '3yzf': 'last3month',
+    '6yzf': 'last6month',
+    '1nzf': 'last1year'
+}
 
-def get_data(type):
+
+def get_data(fund_type, month_type):
     url = 'http://fund.eastmoney.com/data/rankhandler.aspx'
     params = {
         'op': 'ph',
         'dt': 'kf',
-        # 'ft': 'gp',zq zs qdii lof fof hh
-        'ft': type,
+        'ft': fund_type,  # 'ft': 'gp',zq zs qdii lof fof hh
         'rs': '',
         'gs': '0',
-        'sc': '3yzf',
+        'sc': month_type,  # rzdf zzf 1yzf 3yzf 6yzf 1nzf
         'st': 'desc',
         'sd': '2020-09-24',
         'ed': '2021-09-24',
@@ -43,24 +62,26 @@ def get_data(type):
         if all_datas.group(1):
             datas = json.loads(all_datas.group(1))
             line = datas[0]
+            # print(line)
             # 168401,红土转型精选混合(LOF),HTZXJXHHLOF,2022-08-22,3.1898,3.1898,0.07,3.47,9.92,31.55,13.92,1.16,83.32,154.61,1.69,218.98,2016-12-30,1,72.3007,1.50%,0.15%,1,0.15%,1,215.73
+            index = index_map[month_type]
             d = {
                 'name': line.split(',')[1],
                 'code': line.split(',')[0],
-                'last3month': line.split(',')[9],
+                month_map[month_type]: line.split(',')[index],
                 'date': line.split(',')[3],
-                'type': type,
+                'type': fund_type,
             }
             # print(d)
             return d
     return None
 
 
-def aggreate_data():
+def aggreate_data(date_type='3yzf'):
     types = ['gp', 'zq', 'zs', 'qdii', 'hh', 'fof']
     datas = []
     for i in types:
-        datas.append(get_data(i))
+        datas.append(get_data(i, date_type))
 
     for d in datas:
         if d['type'] == 'qdii' or d['type'] == 'fof':
@@ -71,6 +92,13 @@ def aggreate_data():
 
 
 if __name__ == '__main__':
+    # rzdf    zzf    1yzf   3yzf   6yzf  1nzf
+    # 日增长率 近一周  近一月  近三月  近6月  近一年
+
     start = time.time()
-    aggreate_data()
-    print(time.time()-start)
+    # date_types = ['rzdf', 'zzf', '1yzf', '3yzf', '6yzf', '1nzf']
+    # for date_type in date_types:
+    #     aggreate_data(date_type)
+
+    aggreate_data('1yzf')
+    print(time.time() - start)

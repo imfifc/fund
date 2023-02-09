@@ -3,13 +3,19 @@ from pathlib import Path
 
 from flask import Flask, request, flash, url_for, redirect, render_template, jsonify, Response, make_response, \
     send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from gevent import pywsgi
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
+# from flask_migrate import Migrate
 
 from pyecharts import options as opts
 from pyecharts.charts import Bar, Line
 from werkzeug.utils import secure_filename
 from pyecharts.faker import Faker
 
-# from fund.model import FundRand, db
+# from fund.model import Last1week, db
 
 # app = Flask(__name__, static_folder="static")  # static file 切记不要写错哦
 import pymysql
@@ -17,7 +23,7 @@ import pymysql
 # from fund import user
 from fund import user, create_app
 from fund.data import aggreate_data
-from fund.models import FundRand, DayGrowRate, Last1month, Last6month, Last1week, Last1year
+from fund.models import Last1week, DayGrowRate, Last1month, Last6month, Last1week, Last1year
 from fund.dbs import db
 from fund.task import make_celery
 
@@ -117,49 +123,20 @@ def bar_base() -> Bar:
 
 @app.route('/new', methods=['GET', 'POST'])
 def new():
-    # 默认 最近三月
-    datas = aggreate_data('3yzf')
-    for data in datas:
-        f = FundRand(**data)
-        if not FundRand.query.filter_by(type=data.get('type'), date=data.get('date')).first():
-            db.session.add(f)
-    # 日增长率
-    datas = aggreate_data('rzdf')
-    for data in datas:
-        f = DayGrowRate(**data)
-        if not DayGrowRate.query.filter_by(type=data.get('type'), date=data.get('date')).first():
-            db.session.add(f)
-    # 最近一周
-    datas = aggreate_data('zzf')
+    datas = aggreate_data()
+
     for data in datas:
         f = Last1week(**data)
         if not Last1week.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
-    # 最近一月
-    datas = aggreate_data('1yzf')
-    for data in datas:
-        f = Last1month(**data)
-        if not Last1month.query.filter_by(type=data.get('type'), date=data.get('date')).first():
-            db.session.add(f)
-    # 最近六月
-    datas = aggreate_data('6yzf')
-    for data in datas:
-        f = Last6month(**data)
-        if not Last6month.query.filter_by(type=data.get('type'), date=data.get('date')).first():
-            db.session.add(f)
-    # 最近一年
-    datas = aggreate_data('1nzf')
-    for data in datas:
-        f = Last1year(**data)
-        if not Last1year.query.filter_by(type=data.get('type'), date=data.get('date')).first():
-            db.session.add(f)
+        # db.session.add(f)
     db.session.commit()
     return jsonify(data=datas, code=200)
 
 
 @app.route('/show')
 def show():
-    datas = FundRand.query.order_by(FundRand.date.desc()).all()
+    datas = Last1week.query.order_by(Last1week.date.desc()).all()
     # print(res)
     datas = [i.tojson() for i in datas]
     return render_template('show.html', datas=datas)
@@ -167,7 +144,7 @@ def show():
 
 @app.route('/insert', methods=['POST', 'GET'])
 def insert():
-    # user = FundRand.query.filter_by(id=id).first()
+    # user = Last1week.query.filter_by(id=id).first()
     if request.method == "POST":
         # print('form', request.form.to_dict())
         form = request.form.to_dict()
@@ -175,10 +152,10 @@ def insert():
             'code': form.get('code'),
             'type': form.get('type'),
             'name': form.get('name'),
-            'last3month': form.get('last3month'),
+            'last1week': form.get('last1week'),
             'date': form.get('date'),
         }
-        f = FundRand(**data)
+        f = Last1week(**data)
         db.session.add(f)
         db.session.commit()
         return redirect(url_for('show'))
@@ -188,13 +165,13 @@ def insert():
 
 @app.route('/update/<int:id>', methods=['POST', 'GET'])
 def update(id):
-    user = FundRand.query.filter_by(id=id).first()
+    user = Last1week.query.filter_by(id=id).first()
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         form = request.form.to_dict()
-        FundRand.query.filter_by(id=id).update(
-            {'last3month': form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
+        Last1week.query.filter_by(id=id).update(
+            {'last1week': form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
         db.session.commit()
         return redirect(url_for('show'))
 
@@ -203,12 +180,12 @@ def update(id):
 
 @app.route('/delete/<int:id>', methods=['POST', 'GET'])
 def delete(id):
-    user = FundRand.query.filter_by(id=id).first()
+    user = Last1week.query.filter_by(id=id).first()
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         # form = request.form.to_dict()
-        FundRand.query.filter_by(id=id).delete()
+        Last1week.query.filter_by(id=id).delete()
         db.session.commit()
         # return '删除成功'
         return redirect(url_for('show'))
@@ -218,12 +195,12 @@ def delete(id):
 
 @app.route('/batch_delete/<date>', methods=['POST', 'GET'])
 def batch_delete(date):
-    user = FundRand.query.filter_by(date=date).first()
+    user = Last1week.query.filter_by(date=date).first()
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         # form = request.form.to_dict()
-        FundRand.query.filter_by(date=date).delete()
+        Last1week.query.filter_by(date=date).delete()
         db.session.commit()
         # return '删除成功'
         return redirect(url_for('show'))
@@ -263,35 +240,35 @@ def echart():
 
 
 def filter_condition(kind, start_time, end_time: str):
-    return FundRand.query.filter_by(type=kind).filter(FundRand.date >= start_time,
-                                                      FundRand.date <= end_time).order_by('date').all()
+    return Last1week.query.filter_by(type=kind).filter(Last1week.date >= start_time,
+                                                       Last1week.date <= end_time).order_by('date').all()
 
 
 def get_x_y_datas_2022():
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
-    # date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
+    # date_instances = Last1week.query.filter_by(type='gp').order_by('date').all()
     date_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
     dates = [i.date for i in date_instances]
     x_data = dates
     # 股票型
     gp_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
-    gp_datas = [i.last3month for i in gp_instances]
+    gp_datas = [i.last1week for i in gp_instances]
     # 债券型
     zq_instances = filter_condition('zq', '2022-01-01', '2022-12-12')
-    zq_datas = [i.last3month for i in zq_instances]
+    zq_datas = [i.last1week for i in zq_instances]
     # 指数型
     zs_instances = filter_condition('zs', '2022-01-01', '2022-12-12')
-    zs_datas = [i.last3month for i in zs_instances]
+    zs_datas = [i.last1week for i in zs_instances]
     # qdii型
     qdii_instances = filter_condition('qdii', '2022-01-01', '2022-12-12')
-    qdii_datas = [i.last3month for i in qdii_instances]
+    qdii_datas = [i.last1week for i in qdii_instances]
     # fof型
     fof_instances = filter_condition('fof', '2022-01-01', '2022-12-12')
-    fof_datas = [i.last3month for i in fof_instances]
+    fof_datas = [i.last1week for i in fof_instances]
     # 混合型
     hh_instances = filter_condition('hh', '2022-01-01', '2022-12-12')
-    hh_datas = [i.last3month for i in hh_instances]
+    hh_datas = [i.last1week for i in hh_instances]
     # print('hh_datas', hh_datas)
     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
@@ -299,28 +276,28 @@ def get_x_y_datas_2022():
 def get_x_y_datas_2023():
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
-    # date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
+    # date_instances = Last1week.query.filter_by(type='gp').order_by('date').all()
     date_instances = filter_condition('gp', '2023-01-01', '2023-12-12')
     dates = [i.date for i in date_instances]
     x_data = dates
     # 股票型
     gp_instances = filter_condition('gp', '2023-01-01', '2023-12-12')
-    gp_datas = [i.last3month for i in gp_instances]
+    gp_datas = [i.last1week for i in gp_instances]
     # 债券型
     zq_instances = filter_condition('zq', '2023-01-01', '2023-12-12')
-    zq_datas = [i.last3month for i in zq_instances]
+    zq_datas = [i.last1week for i in zq_instances]
     # 指数型
     zs_instances = filter_condition('zs', '2023-01-01', '2023-12-12')
-    zs_datas = [i.last3month for i in zs_instances]
+    zs_datas = [i.last1week for i in zs_instances]
     # qdii型
     qdii_instances = filter_condition('qdii', '2023-01-01', '2023-12-12')
-    qdii_datas = [i.last3month for i in qdii_instances]
+    qdii_datas = [i.last1week for i in qdii_instances]
     # fof型
     fof_instances = filter_condition('fof', '2023-01-01', '2023-12-12')
-    fof_datas = [i.last3month for i in fof_instances]
+    fof_datas = [i.last1week for i in fof_instances]
     # 混合型
     hh_instances = filter_condition('hh', '2023-01-01', '2023-12-12')
-    hh_datas = [i.last3month for i in hh_instances]
+    hh_datas = [i.last1week for i in hh_instances]
     # print('hh_datas', hh_datas)
     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
@@ -328,27 +305,27 @@ def get_x_y_datas_2023():
 def get_x_y_datas():
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
-    date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
+    date_instances = Last1week.query.filter_by(type='gp').order_by('date').all()
     dates = [i.date for i in date_instances]
     x_data = dates
     # 股票型
-    gp_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
-    gp_datas = [i.last3month for i in gp_instances]
+    gp_instances = Last1week.query.filter_by(type='gp').order_by('date').all()
+    gp_datas = [i.last1week for i in gp_instances]
     # 债券型
-    zq_instances = FundRand.query.filter_by(type='zq').order_by('date').all()
-    zq_datas = [i.last3month for i in zq_instances]
+    zq_instances = Last1week.query.filter_by(type='zq').order_by('date').all()
+    zq_datas = [i.last1week for i in zq_instances]
     # 指数型
-    zs_instances = FundRand.query.filter_by(type='zs').order_by('date').all()
-    zs_datas = [i.last3month for i in zs_instances]
+    zs_instances = Last1week.query.filter_by(type='zs').order_by('date').all()
+    zs_datas = [i.last1week for i in zs_instances]
     # qdii型
-    qdii_instances = FundRand.query.filter_by(type='qdii').order_by('date').all()
-    qdii_datas = [i.last3month for i in qdii_instances]
+    qdii_instances = Last1week.query.filter_by(type='qdii').order_by('date').all()
+    qdii_datas = [i.last1week for i in qdii_instances]
     # fof型
-    fof_instances = FundRand.query.filter_by(type='fof').order_by('date').all()
-    fof_datas = [i.last3month for i in fof_instances]
+    fof_instances = Last1week.query.filter_by(type='fof').order_by('date').all()
+    fof_datas = [i.last1week for i in fof_instances]
     # 混合型
-    hh_instances = FundRand.query.filter_by(type='hh').order_by('date').all()
-    hh_datas = [i.last3month for i in hh_instances]
+    hh_instances = Last1week.query.filter_by(type='hh').order_by('date').all()
+    hh_datas = [i.last1week for i in hh_instances]
     # print('hh_datas', hh_datas)
     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 

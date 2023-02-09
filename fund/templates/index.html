@@ -3,25 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Awesome-pyecharts</title>
-    <script type="text/javascript" src="http://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+{#    <script type="text/javascript" src="http://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>#}
+{#    <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>#}
+    <script src="{{ url_for('static',filename='jquery.js') }}"></script>
+    <script src="{{ url_for('static',filename='echarts.js') }}"></script>
+    <style>
+        * {
+            margin: 10;
+            padding: 0;
+        }
+        .pp {
+            width: 200px;
+        }
+        .pp {
+            line-height: 30px;
+            border: 1px solid #ccc;
+            margin-top: 40px;
+        }
+
+    </style>
 </head>
 <body>
-    <div id="bar" style="width:1200px; height:800px;"></div>
-    <script>
-        $(
-            function () {
-                var chart = echarts.init(document.getElementById('bar'), 'white', {renderer: 'canvas'});
-                $.ajax({
-                    type: "GET",
-                    url: "/barChart",
-                    dataType: 'json',
-                    success: function (result) {
-                        chart.setOption(result);
-                    }
-                });
-            }
-        )
-    </script>
+<div >
+    <a href="/test" class="pp">test</a>
+    <a href="/insert" class="pp">插入</a>
+    <a href="/show" class="pp">show</a>
+    <a href="/line1">line1_曲线</a>
+    <a href="/line2">line2_曲线</a>
+    <a href="/upload">上传数据 </a>
+    <a href="/download">下载数据 </a>
+    <a href="/new">爬虫添加数据 </a>
+
+</div>
+
+<div id="bar" style="width:1200px; height:800px;"></div>
+<script>
+    $(
+        function () {
+            var chart = echarts.init(document.getElementById('bar'), 'white', {renderer: 'canvas'});
+            $.ajax({
+                type: "GET",
+                url: "/barChart",
+                dataType: 'json',
+                success: function (result) {
+                    chart.setOption(result);
+                }
+            });
+        }
+    )
+</script>
 </body>
 </html>

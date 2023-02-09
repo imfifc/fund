@@ -7,6 +7,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /root/.ssh:/root/.ssh
       - /tmp/fund.sqlite3:/Project/demo/fund/fund.sqlite3
+      - /tmp/files:/Project/demo/fund/static/files
     ports:
       - "8090:8090"
     privileged: true
