@@ -21,7 +21,7 @@
     // 指定图表的配置项和数据
     option = {
         title: {
-            text: 'Stacked Line'
+            text: '默认 近三月走势'
         },
         tooltip: {
             trigger: 'axis'
@@ -64,7 +64,7 @@
     };
 
     // 异步加载数据
-    $.get('/echart').done(function (res) {
+    $.get('/last3month_2023').done(function (res) {
         // 填入数据
         console.log(res)
         myChart.setOption({
@@ -129,7 +129,7 @@
     option = {
         color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087', '#FFBF00'],
         title: {
-            text: 'Gradient Stacked Area Chart'
+            text: '近3月走势 Gradient Stacked Area Chart'
         },
         tooltip: {
             trigger: 'axis',
@@ -180,7 +180,7 @@
     };
 
     // 异步加载数据
-    $.get('/echart').done(function (res) {
+    $.get('/last3month_2023').done(function (res) {
         // 填入数据
         console.log(res)
         myChart2.setOption({

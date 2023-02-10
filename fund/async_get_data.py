@@ -1,8 +1,6 @@
 import asyncio
 import json
 import time
-from concurrent.futures import ThreadPoolExecutor
-
 import aiohttp
 import requests
 import re
@@ -80,7 +78,6 @@ async def get(fund_type, month_type):
     datas = await parse_data(data, fund_type, month_type)
     await session.close()
     return datas
-    # return None
 
 
 async def request(date_type):
@@ -99,7 +96,7 @@ async def request(date_type):
     return datas
 
 
-def main():
+def disorder():
     date_types = ['rzdf', 'zzf', '1yzf', '3yzf', '6yzf', '1nzf']
 
     tasks = [asyncio.ensure_future(request(i)) for i in date_types]
@@ -110,13 +107,25 @@ def main():
         print(task.result())
 
 
-async def main2():
+async def order_data():
     # asyncio.gather 按顺序输出
     date_types = ['rzdf', 'zzf', '1yzf', '3yzf', '6yzf', '1nzf']
 
     tasks = [asyncio.ensure_future(request(i)) for i in date_types]
     res = await asyncio.gather(*tasks)
     return res
+
+
+def async_aggreate_data():
+    start = time.time()
+    res = asyncio.run(order_data())
+    # print(res)
+    if len(res) == 6:
+        date_types = ['rzdf', 'zzf', '1yzf', '3yzf', '6yzf', '1nzf']
+        data = zip(date_types, res)
+        # print(dict(data))
+        print('爬虫耗时', time.time() - start)
+        return dict(data)
 
 
 if __name__ == '__main__':
@@ -127,26 +136,6 @@ if __name__ == '__main__':
     # #     aggreate_data(date_type)
     #
     # aggreate_data('1yzf')
-    # start = time.time()
-    # loop = asyncio.get_event_loop()
-    # res = loop.run_until_complete(main2())
-    # print(res)
-    # print(time.time() - start)
-
-    async def first_task():
-        print("First Task")
-
-
-    async def second_task():
-        print("Second Task")
-
-
-    async def third_task():
-        print("Third Task")
-
-
-    async def main():
-        await asyncio.gather(first_task(), second_task(), third_task())
-
-
-    asyncio.run(main())
+    start = time.time()
+    print(async_aggreate_data())
+    print(time.time() - start)

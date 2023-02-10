@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>分页示例</title>
+</head>
+<body>
+<table id="data">
+    <!-- 数据表格 -->
+</table>
+<div id="pagination">
+    <!-- 分页控件 -->
+</div>
+<script>
+    const data = [
+        {name: "张三", age: 18},
+        {name: "李四", age: 19},
+        {name: "王五", age: 20},
+        {name: "赵六", age: 21},
+        {name: "王五", age: 20},
+        {name: "赵六", age: 21},
+        {name: "赵六", age: 21},
+        {name: "王五", age: 20},
+        {name: "赵六", age: 21},
+        {name: "王五", age: 20},
+        {name: "赵六", age: 21},
+        // ...
+    ];
+    const pageSize = 5; // 每页数据数量
+    let currentPage = 1; // 当前页码
+
+    function renderData() {
+        // 渲染数据表格
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const pageData = data.slice(startIndex, endIndex);
+        let tableData = "";
+        pageData.forEach(item => {
+            tableData += `<tr><td>${item.name}</td><td>${item.age}</td></tr>`;
+        });
+        document.querySelector("#data").innerHTML = tableData;
+    }
+
+    function renderPagination() {
+        // 渲染分页控件
+        const pageCount = Math.ceil(data.length / pageSize);
+        let pagination = "";
+        for (let i = 1; i <= pageCount; i++) {
+            pagination += `<button ${i === currentPage ? 'disabled' : ''} onclick="goToPage(${i})">${i}</button>`;
+        }
+        document.querySelector("#pagination").innerHTML = pagination;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        renderData();
+        renderPagination();
+    }
+
+    renderData();
+    renderPagination();
+</script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 
 from flask import Flask, request, flash, url_for, redirect, render_template, jsonify, Response, make_response, \
@@ -16,6 +17,7 @@ import pymysql
 
 # from fund import user
 from fund import user, create_app
+from fund.async_get_data import async_aggreate_data
 from fund.data import aggreate_data
 from fund.models import FundRand, DayGrowRate, Last1month, Last6month, Last1week, Last1year
 from fund.dbs import db
@@ -118,51 +120,75 @@ def bar_base() -> Bar:
 @app.route('/new', methods=['GET', 'POST'])
 def new():
     # 默认 最近三月
-    datas = aggreate_data('3yzf')
+    try:
+        all_datas = async_aggreate_data()
+        if not all_datas:
+            time.sleep(1)
+            return redirect(url_for('new'))
+    except Exception as e:
+        print(e)
+        time.sleep(1)
+        return redirect(url_for('new'))
+
+    datas = all_datas.get('3yzf')
     for data in datas:
         f = FundRand(**data)
         if not FundRand.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     # 日增长率
-    datas = aggreate_data('rzdf')
+    datas = all_datas['rzdf']
     for data in datas:
         f = DayGrowRate(**data)
         if not DayGrowRate.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     # 最近一周
-    datas = aggreate_data('zzf')
+    datas = all_datas['zzf']
     for data in datas:
         f = Last1week(**data)
         if not Last1week.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     # 最近一月
-    datas = aggreate_data('1yzf')
+    datas = all_datas['1yzf']
     for data in datas:
         f = Last1month(**data)
         if not Last1month.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     # 最近六月
-    datas = aggreate_data('6yzf')
+    datas = all_datas['6yzf']
     for data in datas:
         f = Last6month(**data)
         if not Last6month.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     # 最近一年
-    datas = aggreate_data('1nzf')
+    datas = all_datas['1nzf']
     for data in datas:
         f = Last1year(**data)
         if not Last1year.query.filter_by(type=data.get('type'), date=data.get('date')).first():
             db.session.add(f)
     db.session.commit()
-    return jsonify(data=datas, code=200)
+    return jsonify(data=all_datas, code=200)
 
 
-@app.route('/show')
-def show():
-    datas = FundRand.query.order_by(FundRand.date.desc()).all()
+@app.route('/show/<model>')
+def show(model):
+    model = eval(model)
+    print('model', model, type(model))
+
+    datas = model.query.order_by(model.date.desc()).all()
     # print(res)
     datas = [i.tojson() for i in datas]
-    return render_template('show.html', datas=datas)
+    if model == FundRand:
+        return render_template('show.html', datas=datas, date_var='last3month')
+    elif model == Last1week:
+        return render_template('show.html', datas=datas, date_var='last1week')
+    elif model == Last1month:
+        return render_template('show.html', datas=datas, date_var='last1month')
+    elif model == Last6month:
+        return render_template('show.html', datas=datas, date_var='last6month')
+    elif model == Last1year:
+        return render_template('show.html', datas=datas, date_var='last1year')
+    elif model == DayGrowRate:
+        return render_template('show.html', datas=datas, date_var='dayGrowRate')
 
 
 @app.route('/insert', methods=['POST', 'GET'])
@@ -255,16 +281,62 @@ def line2():
     return render_template("line2.html")
 
 
-@app.route("/echart")
-def echart():
+@app.route("/line3")
+def line3():
+    return render_template("line3.html")
+
+
+@app.route("/last3month_2023")
+def last3month_2023():
     x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023()
     return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
                    qdii_data=qdii_datas, fof_data=fof_datas)
 
 
-def filter_condition(kind, start_time, end_time: str):
-    return FundRand.query.filter_by(type=kind).filter(FundRand.date >= start_time,
-                                                      FundRand.date <= end_time).order_by('date').all()
+@app.route("/dayGrowRate_2023")
+def day_grow_rate_2023():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=DayGrowRate,
+                                                                                               date_type='dayGrowRate')
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+@app.route("/last1week_2023")
+def last1week_2023():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=Last1week,
+                                                                                               date_type='last1week')
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+@app.route("/last1month_2023")
+def last1month_2023():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=Last1month,
+                                                                                               date_type='last1month')
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+@app.route("/last6month_2023")
+def last6month_2023():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=Last6month,
+                                                                                               date_type='last6month')
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+@app.route("/last1year_2023")
+def last1year_2023():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=Last1year,
+                                                                                               date_type='last1year')
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
+def filter_condition(model, kind, start_time='2023-01-01', end_time='2023-12-12'):
+    # Last3month
+    return model.query.filter_by(type=kind).filter(model.date >= start_time, model.date <= end_time).order_by(
+        'date').all()
 
 
 def get_x_y_datas_2022():
@@ -296,31 +368,31 @@ def get_x_y_datas_2022():
     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
 
-def get_x_y_datas_2023():
+def get_x_y_datas_2023(model=FundRand, date_type='last3month'):
     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
     # date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
-    date_instances = filter_condition('gp', '2023-01-01', '2023-12-12')
-    dates = [i.date for i in date_instances]
+    date_instances = filter_condition(model=model, kind='gp')
+    dates = [getattr(i, 'date') for i in date_instances]
     x_data = dates
     # 股票型
-    gp_instances = filter_condition('gp', '2023-01-01', '2023-12-12')
-    gp_datas = [i.last3month for i in gp_instances]
+    gp_instances = filter_condition(model=model, kind='gp')
+    gp_datas = [getattr(i, date_type) for i in gp_instances]
     # 债券型
-    zq_instances = filter_condition('zq', '2023-01-01', '2023-12-12')
-    zq_datas = [i.last3month for i in zq_instances]
+    zq_instances = filter_condition(model=model, kind='zq')
+    zq_datas = [getattr(i, date_type) for i in zq_instances]
     # 指数型
-    zs_instances = filter_condition('zs', '2023-01-01', '2023-12-12')
-    zs_datas = [i.last3month for i in zs_instances]
+    zs_instances = filter_condition(model=model, kind='zs')
+    zs_datas = [getattr(i, date_type) for i in zs_instances]
     # qdii型
-    qdii_instances = filter_condition('qdii', '2023-01-01', '2023-12-12')
-    qdii_datas = [i.last3month for i in qdii_instances]
+    qdii_instances = filter_condition(model=model, kind='qdii')
+    qdii_datas = [getattr(i, date_type) for i in qdii_instances]
     # fof型
-    fof_instances = filter_condition('fof', '2023-01-01', '2023-12-12')
-    fof_datas = [i.last3month for i in fof_instances]
+    fof_instances = filter_condition(model=model, kind='fof')
+    fof_datas = [getattr(i, date_type) for i in fof_instances]
     # 混合型
-    hh_instances = filter_condition('hh', '2023-01-01', '2023-12-12')
-    hh_datas = [i.last3month for i in hh_instances]
+    hh_instances = filter_condition(model=model, kind='hh')
+    hh_datas = [getattr(i, date_type) for i in hh_instances]
     # print('hh_datas', hh_datas)
     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
@@ -397,12 +469,17 @@ def download_file(filename):
         return response
 
 
+@app.route('/test2')
+def test2():
+    return render_template('test2.html')
+
+
 if __name__ == "__main__":
     # db.drop_all()
     # with app.app_context():
     #     db.drop_all()
     #     db.create_all()
-    app.run(debug=True, threaded=True, port=8080)
+    app.run(debug=True, threaded=True, port=8090)
 
     '''提供的方法
     /new 增加数据

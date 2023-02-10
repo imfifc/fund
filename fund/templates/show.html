@@ -25,7 +25,7 @@
         <tr>
             <td><a href="http://fund.eastmoney.com/{{ each.code }}.html"> {{ each.code }}</a></td>
             <td><a href="http://fund.eastmoney.com/{{ each.code }}.html"> {{ each.name }} </a></td>
-            <td>{{ each.last3month }}</td>
+            <td>{{ each[date_var] }}</td>  {#变量中套变量#}
             <td>{{ each.type }}</td>
             <td>{{ each.date }}</td>
             <td>
@@ -36,7 +36,7 @@
         </tr>
     {% endfor %}
 
-
+{#<br>#}
 </table>
 
 
