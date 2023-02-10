@@ -2,7 +2,7 @@ version: "3.7"
 services:
   web:
     build: .
-    container_name: fund
+    container_name: fund2
     volumes:
       - /etc/localtime:/etc/localtime
       - /root/.ssh:/root/.ssh
