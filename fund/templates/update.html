@@ -5,7 +5,7 @@
     <title>更新书籍表</title>
 </head>
 <body>
-<form action="/update/{{ user.id }}" method="post">
+<form action="/{{ model }}/update/{{ user.id }}" method="post">
     {#    {% csrf_token %}#}
     <!--    css3 disabled属性 不可选状态/禁用元素-->
     <p>
@@ -18,7 +18,7 @@
         type : <input type="text" name="type" value="{{ user.type }}" placeholder="gp">
     </p>
     <p>
-        最近3月值:<input type="text" name="price" value="{{ user.last3month }}">
+        {{ date_var }} :<input type="text" name="price" value="{{ user[date_var] }}">
     </p>
     <p>
         日期:<input type="text" name="date" value="{{ user.date }}">

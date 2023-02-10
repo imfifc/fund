@@ -29,9 +29,9 @@
             <td>{{ each.type }}</td>
             <td>{{ each.date }}</td>
             <td>
-                <a href="update/{{ each.id }}">更新</a>
-                <a href="delete/{{ each.id }}">删除</a>
-                <a href="batch_delete/{{ each.date }}">批量删除</a>
+                <a href="/{{ model }}/update/{{ each.id }}">更新</a>
+                <a href="/{{ model }}/delete/{{ each.id }}">删除</a>
+                <a href="/{{ model }}/batch_delete/{{ each.date }}">批量删除</a>
             </td>
         </tr>
     {% endfor %}

@@ -23,7 +23,7 @@
         名字:<input type="text" value="{{ user.name }}" disabled="disabled">
     </p>
     <p>
-        最近3月值:<input type="text" name="price" value="{{ user.last3month }}" disabled="disabled" >
+        {{ date_var }}值:<input type="text" name="price" value="{{ user[date_var] }}" disabled="disabled" >
     </p>
     <p>
         日期:<input type="text" name="date" value="{{ user.date }}" disabled="disabled" >

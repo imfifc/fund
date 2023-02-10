@@ -14,10 +14,10 @@
     </style>
 </head>
 <body>
-<form action="" method="post">
+<form action="/{{ model }}/batch_delete/{{ date }}" method="post">
     {#    {% csrf_token %}#}
     <p>
-        批量删除的日期 :<input type="text" name="date" value="{{ user.date }}"  >
+        {{ model }}批量删除的日期 :<input type="text" name="date" value="{{ user.date }}"  >
     </p>
     <input type="submit" value="确认删除">
     </p>

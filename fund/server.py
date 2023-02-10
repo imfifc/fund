@@ -169,26 +169,26 @@ def new():
     return jsonify(data=all_datas, code=200)
 
 
-@app.route('/show/<model>')
-def show(model):
-    model = eval(model)
+@app.route('/show/<Model>')
+def show(Model):
+    model = eval(Model)
     print('model', model, type(model))
 
     datas = model.query.order_by(model.date.desc()).all()
     # print(res)
     datas = [i.tojson() for i in datas]
     if model == FundRand:
-        return render_template('show.html', datas=datas, date_var='last3month')
+        return render_template('show.html', datas=datas, date_var='last3month', model=Model)
     elif model == Last1week:
-        return render_template('show.html', datas=datas, date_var='last1week')
+        return render_template('show.html', datas=datas, date_var='last1week', model=Model)
     elif model == Last1month:
-        return render_template('show.html', datas=datas, date_var='last1month')
+        return render_template('show.html', datas=datas, date_var='last1month', model=Model)
     elif model == Last6month:
-        return render_template('show.html', datas=datas, date_var='last6month')
+        return render_template('show.html', datas=datas, date_var='last6month', model=Model)
     elif model == Last1year:
-        return render_template('show.html', datas=datas, date_var='last1year')
+        return render_template('show.html', datas=datas, date_var='last1year', model=Model)
     elif model == DayGrowRate:
-        return render_template('show.html', datas=datas, date_var='dayGrowRate')
+        return render_template('show.html', datas=datas, date_var='dayGrowRate', model=Model)
 
 
 @app.route('/insert', methods=['POST', 'GET'])
@@ -212,49 +212,102 @@ def insert():
     return render_template('insert_fund.html')
 
 
-@app.route('/update/<int:id>', methods=['POST', 'GET'])
-def update(id):
-    user = FundRand.query.filter_by(id=id).first()
+@app.route('/<Model>/update/<int:id>', methods=['POST', 'GET'])
+def update(Model, id):
+    model = eval(Model)
+    user = model.query.filter_by(id=id).first()
+    model_map = {
+        FundRand: 'last3month',
+        Last1week: 'last1week',
+        Last1month: 'last1month',
+        Last6month: 'last6month',
+        Last1year: 'last1year',
+        DayGrowRate: 'dayGrowRate',
+    }
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         form = request.form.to_dict()
-        FundRand.query.filter_by(id=id).update(
-            {'last3month': form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
+        model.query.filter_by(id=id).update(
+            {model_map[model]: form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
         db.session.commit()
-        return redirect(url_for('show'))
+        return redirect(url_for('show', Model=Model))
 
-    return render_template('update.html', user=user)
+    if model == FundRand:
+        return render_template('update.html', user=user, date_var='last3month', model=Model)
+    elif model == Last1week:
+        return render_template('update.html', user=user, date_var='last1week', model=Model)
+    elif model == Last1month:
+        return render_template('update.html', user=user, date_var='last1month', model=Model)
+    elif model == Last6month:
+        return render_template('update.html', user=user, date_var='last6month', model=Model)
+    elif model == Last1year:
+        return render_template('update.html', user=user, date_var='last1year', model=Model)
+    elif model == DayGrowRate:
+        return render_template('update.html', user=user, date_var='dayGrowRate', model=Model)
 
 
-@app.route('/delete/<int:id>', methods=['POST', 'GET'])
-def delete(id):
-    user = FundRand.query.filter_by(id=id).first()
+@app.route('/<Model>/delete/<int:id>', methods=['POST', 'GET'])
+def delete(Model, id):
+    model = eval(Model)
+    user = model.query.filter_by(id=id).first()
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         # form = request.form.to_dict()
-        FundRand.query.filter_by(id=id).delete()
+        model.query.filter_by(id=id).delete()
         db.session.commit()
         # return '删除成功'
-        return redirect(url_for('show'))
+        return redirect(url_for('show', Model=Model))
 
-    return render_template('delete_fund.html', user=user)
+    if model == FundRand:
+        return render_template('delete_fund.html', user=user, date_var='last3month', model=Model)
+    elif model == Last1week:
+        return render_template('delete_fund.html', user=user, date_var='last1week', model=Model)
+    elif model == Last1month:
+        return render_template('delete_fund.html', user=user, date_var='last1month', model=Model)
+    elif model == Last6month:
+        return render_template('delete_fund.html', user=user, date_var='last6month', model=Model)
+    elif model == Last1year:
+        return render_template('delete_fund.html', user=user, date_var='last1year', model=Model)
+    elif model == DayGrowRate:
+        return render_template('delete_fund.html', user=user, date_var='dayGrowRate', model=Model)
 
 
-@app.route('/batch_delete/<date>', methods=['POST', 'GET'])
-def batch_delete(date):
-    user = FundRand.query.filter_by(date=date).first()
+@app.route('/<Model>/batch_delete/<date>', methods=['POST', 'GET'])
+def batch_delete(Model, date):
+    model = eval(Model)
+    model_map = {
+        FundRand: 'last3month',
+        Last1week: 'last1week',
+        Last1month: 'last1month',
+        Last6month: 'last6month',
+        Last1year: 'last1year',
+        DayGrowRate: 'dayGrowRate',
+    }
+    user = model.query.filter_by(date=date).first()
 
     if request.method == "POST":
         # print('form', request.form.to_dict())
         # form = request.form.to_dict()
-        FundRand.query.filter_by(date=date).delete()
+        model.query.filter_by(date=date).delete()
         db.session.commit()
         # return '删除成功'
-        return redirect(url_for('show'))
+        return redirect(url_for('show', Model=Model))
 
-    return render_template('batch_delete.html', user=user)
+    # return render_template('batch_delete.html', user=user)
+    if model == FundRand:
+        return render_template('batch_delete.html', user=user, date_var='last3month', model=Model, date=date)
+    elif model == Last1week:
+        return render_template('batch_delete.html', user=user, date_var='last1week', model=Model, date=date)
+    elif model == Last1month:
+        return render_template('batch_delete.html', user=user, date_var='last1month', model=Model, date=date)
+    elif model == Last6month:
+        return render_template('batch_delete.html', user=user, date_var='last6month', model=Model, date=date)
+    elif model == Last1year:
+        return render_template('batch_delete.html', user=user, date_var='last1year', model=Model, date=date)
+    elif model == DayGrowRate:
+        return render_template('batch_delete.html', user=user, date_var='dayGrowRate', model=Model, date=date)
 
 
 @app.route("/")
