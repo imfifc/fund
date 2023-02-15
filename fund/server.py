@@ -371,6 +371,13 @@ def last3month_2023():
                    qdii_data=qdii_datas, fof_data=fof_datas)
 
 
+@app.route("/Last3month")
+def last3month_all():
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas()
+    return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
+                   qdii_data=qdii_datas, fof_data=fof_datas)
+
+
 @app.route("/dayGrowRate_2023")
 def day_grow_rate_2023():
     x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023(model=DayGrowRate,
