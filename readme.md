@@ -63,7 +63,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
       - /root/.ssh:/root/.ssh
-      - /tmp/fund.sqlite3:/Project/demo/fund/fund.sqlite3
+      - /tmp/fund3.sqlite3:/Project/demo/fund/fund3.sqlite3
     ports:
       - "8090:8090"
     privileged: true

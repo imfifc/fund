@@ -34,7 +34,7 @@ def create_app():
     app.config['JSON_AS_ASCII'] = False
     # 这里连接串的意思是使用pymysql去连接mysql
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3316/mytest'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fund.sqlite3'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fund3.sqlite3'
     app.config['SECRET_KEY'] = "random string"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True

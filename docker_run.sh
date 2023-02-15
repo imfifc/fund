@@ -12,7 +12,7 @@ gunicorn start:app -c gunicorn.conf.py
 docker build  --network=host -t testfund:v1 .
 #docker run -itd --network=host --name=fund testfund:v1 bash
 # 加root可以访问，同时setenforce 0
-#docker run -d --network host --name fund  --privileged=true -v /tmp/fund/fund/fund.sqlite3:/Project/demo/fund/fund/fund.sqlite3 testfnd
+#docker run -d --network host --name fund  --privileged=true -v /tmp/fund/fund/fund3.sqlite3:/Project/demo/fund/fund/fund3.sqlite3 testfnd
 docker run -d --network=host --name=fund testfund:v1
 
 # 设置定时任务触发启动爬虫入库
