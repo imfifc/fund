@@ -23,10 +23,13 @@
         名字:<input type="text" value="{{ user.name }}" disabled="disabled">
     </p>
     <p>
-        {{ date_var }}值:<input type="text" name="price" value="{{ user[date_var] }}" disabled="disabled" >
+        type : <input type="text" name="type" value="{{ user.type }}" placeholder="gp">
     </p>
     <p>
-        日期:<input type="text" name="date" value="{{ user.date }}" disabled="disabled" >
+        {{ date_var }}值:<input type="text" name="price" value="{{ user[date_var] }}" disabled="disabled">
+    </p>
+    <p>
+        日期:<input type="text" name="date" value="{{ user.date }}" disabled="disabled">
     </p>
     <input type="submit" value="确认删除">
     </p>

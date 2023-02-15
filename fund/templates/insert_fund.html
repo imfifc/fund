@@ -7,6 +7,14 @@
 <body>
 <form action="/insert" method="post">
     {#    {% csrf_token %}#}
+    <div>
+        <h3>model类型： DayGrowRate Last1week Last1month FundRand Last6month Last1year </h3>
+        <h4>注：FundRand:最近三月</h4>
+
+    </div>
+    <p>
+        model : <input type="text" name="model" placeholder="DayGrowRate  Last1week Last1month FundRand Last6month Last1year">
+    </p>
     <p>
         name : <input type="text" name="name">
     </p>
@@ -17,7 +25,7 @@
         type : <input type="text" name="type" placeholder="gp">
     </p>
     <p>
-        last3month price : <input type="text" name="last3month">
+        price : <input type="text" name="price">
     </p>
     <p>
         date : <input type="text" name="date" placeholder="2022-08-27">

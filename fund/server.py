@@ -195,21 +195,45 @@ def show(Model):
 def insert():
     # user = FundRand.query.filter_by(id=id).first()
     if request.method == "POST":
-        # print('form', request.form.to_dict())
+        print('form', request.form.to_dict())
         form = request.form.to_dict()
+        Model = form.get('model')
+        model = eval(Model)
+
+        model_map = {
+            FundRand: 'last3month',
+            Last1week: 'last1week',
+            Last1month: 'last1month',
+            Last6month: 'last6month',
+            Last1year: 'last1year',
+            DayGrowRate: 'dayGrowRate',
+        }
+
         data = {
             'code': form.get('code'),
             'type': form.get('type'),
             'name': form.get('name'),
-            'last3month': form.get('last3month'),
+            model_map[model]: form.get('price'),
             'date': form.get('date'),
         }
-        f = FundRand(**data)
+        f = model(**data)
         db.session.add(f)
         db.session.commit()
-        return redirect(url_for('show'))
+        return redirect(url_for('show', Model=Model))
 
     return render_template('insert_fund.html')
+    # if model == FundRand:
+    #     return render_template('insert_fund.html', user=user, date_var='last3month', model=Model)
+    # elif model == Last1week:
+    #     return render_template('insert_fund.html', user=user, date_var='last1week', model=Model)
+    # elif model == Last1month:
+    #     return render_template('insert_fund.html', user=user, date_var='last1month', model=Model)
+    # elif model == Last6month:
+    #     return render_template('insert_fund.html', user=user, date_var='last6month', model=Model)
+    # elif model == Last1year:
+    #     return render_template('insert_fund.html', user=user, date_var='last1year', model=Model)
+    # elif model == DayGrowRate:
+    #     return render_template('insert_fund.html', user=user, date_var='dayGrowRate', model=Model)
 
 
 @app.route('/<Model>/update/<int:id>', methods=['POST', 'GET'])
@@ -229,7 +253,8 @@ def update(Model, id):
         # print('form', request.form.to_dict())
         form = request.form.to_dict()
         model.query.filter_by(id=id).update(
-            {model_map[model]: form.get('price'), 'date': form.get('date'), 'type': form.get('type')})
+            {model_map[model]: form.get('price'), 'date': form['date'], 'type': form['type'], 'code': form['code'],
+             'name': form['name']})
         db.session.commit()
         return redirect(url_for('show', Model=Model))
 

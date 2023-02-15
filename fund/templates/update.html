@@ -9,10 +9,11 @@
     {#    {% csrf_token %}#}
     <!--    css3 disabled属性 不可选状态/禁用元素-->
     <p>
-        code:<input type="text" value="{{ user.code }}" disabled="disabled">
+{#        code:<input type="text" value="{{ user.code }}" disabled="disabled">#}
+        code:<input type="text" name="code" value="{{ user.code }}" >
     </p>
     <p>
-        名字:<input type="text" value="{{ user.name }}" disabled="disabled">
+        名字:<input type="text" name="name" value="{{ user.name }}"  >
     </p>
     <p>
         type : <input type="text" name="type" value="{{ user.type }}" placeholder="gp">
