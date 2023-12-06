@@ -1,13 +1,15 @@
 version: "3.7"
 services:
   web:
-    build: .
-    container_name: fund2
+#    build: . 用于从本地dockerfile构建镜像
+    image: fund3
+    container_name: fund3
     volumes:
       - /etc/localtime:/etc/localtime
       - /root/.ssh:/root/.ssh
       - /tmp/fund3.sqlite3:/Project/demo/fund/fund3.sqlite3
       - /tmp/files:/Project/demo/fund/static/files
+      - /data/private_files:/Project/demo/fund/static/private_files
     ports:
       - "8090:8090"
     privileged: true

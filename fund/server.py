@@ -1,7 +1,7 @@
 import os
 import time
 from pathlib import Path
-
+from urllib.parse import quote
 from flask import Flask, request, flash, url_for, redirect, render_template, jsonify, Response, make_response, \
     send_from_directory
 
@@ -26,6 +26,7 @@ from fund.task import make_celery
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = os.path.join(BASE_DIR, r'fund/static/files')
 UPLOAD_PATH = os.path.join(BASE_DIR, r'fund/static/files')
+PRIVATE_FILE_PATH = os.path.join(BASE_DIR, r'fund/static/private_files')
 DOWNLOAD_FILES = os.listdir(UPLOAD_PATH)
 
 app = create_app()
@@ -424,33 +425,33 @@ def filter_condition(model, kind, start_time='2023-01-01', end_time='2023-12-12'
         'date').all()
 
 
-def get_x_y_datas_2022():
-    # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-    # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
-    # date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
-    date_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
-    dates = [i.date for i in date_instances]
-    x_data = dates
-    # 股票型
-    gp_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
-    gp_datas = [i.last3month for i in gp_instances]
-    # 债券型
-    zq_instances = filter_condition('zq', '2022-01-01', '2022-12-12')
-    zq_datas = [i.last3month for i in zq_instances]
-    # 指数型
-    zs_instances = filter_condition('zs', '2022-01-01', '2022-12-12')
-    zs_datas = [i.last3month for i in zs_instances]
-    # qdii型
-    qdii_instances = filter_condition('qdii', '2022-01-01', '2022-12-12')
-    qdii_datas = [i.last3month for i in qdii_instances]
-    # fof型
-    fof_instances = filter_condition('fof', '2022-01-01', '2022-12-12')
-    fof_datas = [i.last3month for i in fof_instances]
-    # 混合型
-    hh_instances = filter_condition('hh', '2022-01-01', '2022-12-12')
-    hh_datas = [i.last3month for i in hh_instances]
-    # print('hh_datas', hh_datas)
-    return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
+# def get_x_y_datas_2022():
+#     # x_data = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+#     # x_data = ["2022/8/{}".format(i + 1) for i in range(21, 31)]
+#     # date_instances = FundRand.query.filter_by(type='gp').order_by('date').all()
+#     date_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
+#     dates = [i.date for i in date_instances]
+#     x_data = dates
+#     # 股票型
+#     gp_instances = filter_condition('gp', '2022-01-01', '2022-12-12')
+#     gp_datas = [i.last3month for i in gp_instances]
+#     # 债券型
+#     zq_instances = filter_condition('zq', '2022-01-01', '2022-12-12')
+#     zq_datas = [i.last3month for i in zq_instances]
+#     # 指数型
+#     zs_instances = filter_condition('zs', '2022-01-01', '2022-12-12')
+#     zs_datas = [i.last3month for i in zs_instances]
+#     # qdii型
+#     qdii_instances = filter_condition('qdii', '2022-01-01', '2022-12-12')
+#     qdii_datas = [i.last3month for i in qdii_instances]
+#     # fof型
+#     fof_instances = filter_condition('fof', '2022-01-01', '2022-12-12')
+#     fof_datas = [i.last3month for i in fof_instances]
+#     # 混合型
+#     hh_instances = filter_condition('hh', '2022-01-01', '2022-12-12')
+#     hh_datas = [i.last3month for i in hh_instances]
+#     # print('hh_datas', hh_datas)
+#     return x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas
 
 
 def get_x_y_datas_2023(model=FundRand, date_type='last3month'):
@@ -551,6 +552,46 @@ def download_file(filename):
         response = make_response(
             send_from_directory(UPLOAD_PATH, filename.encode('utf-8').decode('utf-8'), as_attachment=True))
         response.headers["Content-Disposition"] = "attachment; filename={}".format(filename.encode().decode('latin-1'))
+        return response
+
+
+@app.route('/upload2', methods=['POST', 'GET'])
+def upload2():
+    if request.method == 'GET':
+        return render_template('upload2.html')
+    elif request.method == 'POST':
+        # 使用request.FILES['myfile']获得文件流对象file
+        file = request.files['myfile']
+        # 文件储存路径，应用settings中的配置，file.name获取文件名
+        new_file = os.path.join(PRIVATE_FILE_PATH, secure_filename(file.filename))
+        print(file.filename)
+        print(secure_filename(file.filename))
+        print(new_file)
+        if not os.path.exists(new_file):
+            # file.save(new_file)
+            file.save(new_file)
+            time.sleep(1)
+            return redirect(url_for('download3'))
+            # return 'file uploaded successfully'
+        else:
+            return 'file exist, please change file'
+
+
+@app.route('/download2', methods=['GET'])
+def download3():
+    if request.method == "GET":
+        files = os.listdir(PRIVATE_FILE_PATH)
+        return render_template('download2.html', files=files)
+
+
+@app.route('/download2/<filename>')
+def download_file2(filename):
+    path = os.path.isfile(os.path.join(PRIVATE_FILE_PATH, filename))
+    if path:
+        encoded_filename = quote(filename)
+        response = make_response(
+            send_from_directory(PRIVATE_FILE_PATH, filename, as_attachment=True))
+        response.headers["Content-Disposition"] = f"attachment; filename*=UTF-8''{encoded_filename}"
         return response
 
 
