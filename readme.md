@@ -42,7 +42,7 @@ CMD ["gunicorn", "start:app", "-c", "./gunicorn.conf.py"]
 ```shell
 docker build  -t testfund:v1 .
 
-docker run -d --network=host --name=fund testfund:v1
+docker run -d --network=host --name=fund --restart=always testfund:v1
 
 docker exec -it fund bash
 ```
@@ -67,10 +67,7 @@ services:
     ports:
       - "8090:8090"
     privileged: true
-
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: always
 ```
 sqlite 使用外挂的方式
 

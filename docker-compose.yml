@@ -13,7 +13,5 @@ services:
     ports:
       - "8090:8090"
     privileged: true
+    restart: always
 
-    deploy:
-      restart_policy:
-        condition: on-failure
