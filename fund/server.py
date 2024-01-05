@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import date, timedelta
 from pathlib import Path
 from urllib.parse import quote
 from flask import Flask, request, flash, url_for, redirect, render_template, jsonify, Response, make_response, \
@@ -174,8 +175,9 @@ def new():
 def show(Model):
     model = eval(Model)
     print('model', model, type(model))
-
-    datas = model.query.order_by(model.date.desc()).all()
+    end_time = date.today()
+    start_time = end_time - timedelta(days=365)
+    datas = model.query.filter(model.date >= start_time, model.date <= end_time).order_by(model.date.desc()).all()
     # print(res)
     datas = [i.tojson() for i in datas]
     if model == FundRand:
@@ -374,7 +376,7 @@ def last3month_2023():
 
 @app.route("/Last3month")
 def last3month_all():
-    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas()
+    x_data, gp_datas, zq_datas, zs_datas, qdii_datas, fof_datas, hh_datas = get_x_y_datas_2023()
     return jsonify(data=x_data, hh_data=hh_datas, gp_data=gp_datas, zq_data=zq_datas, zs_data=zs_datas,
                    qdii_data=qdii_datas, fof_data=fof_datas)
 
@@ -419,8 +421,10 @@ def last1year_2023():
                    qdii_data=qdii_datas, fof_data=fof_datas)
 
 
-def filter_condition(model, kind, start_time='2023-01-01', end_time='2023-12-12'):
+def filter_condition(model, kind):
     # Last3month
+    end_time = date.today()
+    start_time = end_time - timedelta(days=365)
     return model.query.filter_by(type=kind).filter(model.date >= start_time, model.date <= end_time).order_by(
         'date').all()
 
