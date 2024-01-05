@@ -8,6 +8,7 @@ gunicorn start:app -c gunicorn.conf.py
 #
 #done
 # docker build  --network=host -t testfund:v1 .
+docker build --no-cache  -t fund3 .
 
 docker build  --network=host -t testfund:v1 .
 #docker run -itd --network=host --name=fund testfund:v1 bash
