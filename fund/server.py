@@ -424,7 +424,7 @@ def last1year_2023():
 def filter_condition(model, kind):
     # Last3month
     end_time = date.today()
-    start_time = end_time - timedelta(days=365)
+    start_time = end_time - timedelta(days=400)
     return model.query.filter_by(type=kind).filter(model.date >= start_time, model.date <= end_time).order_by(
         'date').all()
 
