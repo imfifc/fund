@@ -88,10 +88,13 @@ async def request(date_type):
         datas.append(res)
     # print(res)
 
+    new_date = [i['date'] for i in datas if i['type'] == 'gp'][0] or datas[0].get('date')
+
     for d in datas:
         if d['type'] == 'qdii' or d['type'] == 'fof':
-            d['date'] = datas[0].get('date')
-    # print(datas)
+            d['date'] = new_date
+        if d['type'] == 'zq' and d.get('last3month'):
+            d['last3month'] = round(float(d['last3month']) - 100, 2)
 
     return datas
 
